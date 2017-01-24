@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -24,7 +26,7 @@ public class Main extends HttpServlet {
 
   private JedisPool pool;
 
-  public Main() throws URISyntaxException, KeyManagementException, NoSuchAlgorithmException {
+  public Main() throws URISyntaxException, KeyManagementException, NoSuchAlgorithmException, IOException {
     if(System.getenv("REDIS_URL") == null) {
       throw new IllegalArgumentException("No REDIS_URL is set!");
     }
@@ -44,7 +46,24 @@ public class Main extends HttpServlet {
 
     URI redisUri = new URI(redissUrl);
 
-    System.out.println("host=" + redisUri.getHost() + " port=" + redisUri.getPort());
+
+
+    Socket socket = new Socket();
+    // ->@wjw_add
+    socket.setReuseAddress(true);
+    socket.setKeepAlive(true); // Will monitor the TCP connection is
+    // valid
+    socket.setTcpNoDelay(true); // Socket buffer Whetherclosed, to
+    // ensure timely delivery of data
+    socket.setSoLinger(true, 0); // Control calls close () method,
+    // the underlying socket is closed
+    // immediately
+    // <-@wjw_add
+
+    InetSocketAddress addr = new InetSocketAddress(redisUri.getHost(), redisUri.getPort());
+    System.out.println("host=" + addr.getHostString());
+
+    socket.connect(addr, 60000);
 
     final SSLParameters sslParameters = new SSLParameters();
     sslParameters.setEndpointIdentificationAlgorithm("HTTPS");
