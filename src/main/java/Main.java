@@ -46,8 +46,8 @@ public class Main extends HttpServlet {
         jedis.hincrBy(key, "count", 1);
 
         Integer sum = Integer.valueOf(jedis.hget(key, "time"));
-        Float count = Float.valueOf(jedis.hget(key, "count"));
-        Float avg = sum / count;
+        Integer count = Integer.valueOf(jedis.hget(key, "count"));
+        Float avg = sum / Float.valueOf(count);
         jedis.hset(key, "average", String.valueOf(avg));
 
         resp.getWriter().print("SUM=" + sum + " COUNT=" + count + " AVG=" + avg);
@@ -56,14 +56,6 @@ public class Main extends HttpServlet {
       resp.getWriter().print("Error!");
       e.printStackTrace();
     }
-  }
-
-  private void showHome(HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException, IOException {
-    resp.getWriter().print("Hello from Java!");
-  }
-
-  private void tick() throws NoSuchAlgorithmException {
   }
 
   public static void main(String[] args) throws Exception{
