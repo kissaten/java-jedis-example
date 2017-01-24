@@ -25,8 +25,7 @@ public class Main extends HttpServlet {
     }
     URI redisUri = new URI(System.getenv("REDIS_URL"));
 
-    Main main = new Main();
-    main.pool = new JedisPool(redisUri);
+    pool = new JedisPool(redisUri);
   }
 
   @Override
