@@ -23,7 +23,21 @@ public class Main extends HttpServlet {
     if(System.getenv("REDIS_URL") == null) {
       throw new IllegalArgumentException("No REDIS_URL is set!");
     }
-    URI redisUri = new URI(System.getenv("REDIS_URL"));
+
+    String rawRedisUrl = System.getenv("REDIS_URL");
+
+    String[] redisUrlParts = rawRedisUrl.split(":");
+
+    Integer port = Integer.valueOf(redisUrlParts[redisUrlParts.length-1]);
+
+    Integer sslPort = port + 1;
+
+    redisUrlParts[0] = "rediss";
+    redisUrlParts[redisUrlParts.length-1] = String.valueOf(sslPort);
+
+    String redissUrl = String.join(":", redisUrlParts);
+
+    URI redisUri = new URI(redissUrl);
 
     pool = new JedisPool(redisUri);
   }
