@@ -42,9 +42,9 @@ public class Main extends HttpServlet {
 
     String redissUrl = String.join(":", redisUrlParts);
 
-    System.out.println("connecting to: " + redissUrl);
-
     URI redisUri = new URI(redissUrl);
+
+    System.out.println("host=" + redisUri.getHost() + " port=" + redisUri.getPort());
 
     final SSLParameters sslParameters = new SSLParameters();
     sslParameters.setEndpointIdentificationAlgorithm("HTTPS");
