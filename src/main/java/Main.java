@@ -61,7 +61,7 @@ public class Main extends HttpServlet {
     // <-@wjw_add
 
     InetSocketAddress addr = new InetSocketAddress(redisUri.getHost(), redisUri.getPort());
-    System.out.println("host=" + addr.getHostString());
+    System.out.println("ip=" + addr.getAddress().getHostAddress());
 
     socket.connect(addr, 60000);
 
