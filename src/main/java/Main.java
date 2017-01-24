@@ -10,10 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.MessageDigest;
@@ -45,25 +42,6 @@ public class Main extends HttpServlet {
     String redissUrl = String.join(":", redisUrlParts);
 
     URI redisUri = new URI(redissUrl);
-
-
-
-    Socket socket = new Socket();
-    // ->@wjw_add
-    socket.setReuseAddress(true);
-    socket.setKeepAlive(true); // Will monitor the TCP connection is
-    // valid
-    socket.setTcpNoDelay(true); // Socket buffer Whetherclosed, to
-    // ensure timely delivery of data
-    socket.setSoLinger(true, 0); // Control calls close () method,
-    // the underlying socket is closed
-    // immediately
-    // <-@wjw_add
-
-    InetSocketAddress addr = new InetSocketAddress(redisUri.getHost(), redisUri.getPort());
-    System.out.println("ip=" + addr.getAddress().getHostAddress());
-
-    socket.connect(addr, 60000);
 
     final SSLParameters sslParameters = new SSLParameters();
     sslParameters.setEndpointIdentificationAlgorithm("HTTPS");
