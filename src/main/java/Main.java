@@ -42,6 +42,8 @@ public class Main extends HttpServlet {
 
     String redissUrl = String.join(":", redisUrlParts);
 
+    System.out.println("connecting to: " + redissUrl);
+
     URI redisUri = new URI(redissUrl);
 
     final SSLParameters sslParameters = new SSLParameters();
