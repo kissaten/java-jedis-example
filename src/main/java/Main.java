@@ -4,6 +4,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
+import javax.net.ssl.*;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -12,14 +13,18 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 public class Main extends HttpServlet {
 
   private JedisPool pool;
 
-  public Main() throws URISyntaxException {
+  public Main() throws URISyntaxException, KeyManagementException, NoSuchAlgorithmException {
     if(System.getenv("REDIS_URL") == null) {
       throw new IllegalArgumentException("No REDIS_URL is set!");
     }
@@ -39,7 +44,39 @@ public class Main extends HttpServlet {
 
     URI redisUri = new URI(redissUrl);
 
-    pool = new JedisPool(redisUri);
+    final SSLParameters sslParameters = new SSLParameters();
+    sslParameters.setEndpointIdentificationAlgorithm("HTTPS");
+
+    pool = new JedisPool(redisUri, createWeakSslSocketFactory(), sslParameters, createWeakHostnameVerifier());
+  }
+
+  public SSLSocketFactory createWeakSslSocketFactory() throws NoSuchAlgorithmException, KeyManagementException {
+    // Create a trust manager that does not validate certificate chains
+    TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+      public X509Certificate[] getAcceptedIssuers() {
+        return new X509Certificate[0];
+      }
+
+      @Override
+      public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException { }
+
+      @Override
+      public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException { }
+    }};
+
+    SSLContext sslContext = SSLContext.getInstance("TLS");
+    sslContext.init(null, trustAllCerts, new SecureRandom());
+    return sslContext.getSocketFactory();
+  }
+
+  public HostnameVerifier createWeakHostnameVerifier() {
+    // Ignore differences between given hostname and certificate hostname
+    return new HostnameVerifier() {
+      @Override
+      public boolean verify(String hostname, SSLSession session) {
+        return true;
+      }
+    };
   }
 
   @Override
@@ -72,7 +109,7 @@ public class Main extends HttpServlet {
     }
   }
 
-  public static void main(String[] args) throws Exception{
+  public static void main(String[] args) throws Exception {
     Server server = new Server(Integer.valueOf(System.getenv("PORT")));
     ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
     context.setContextPath("/");
