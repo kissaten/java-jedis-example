@@ -44,7 +44,7 @@ public class Main extends HttpServlet {
     URI redisUri = new URI(redissUrl);
 
     final SSLParameters sslParameters = new SSLParameters();
-    sslParameters.setEndpointIdentificationAlgorithm("HTTPS");
+//    sslParameters.setEndpointIdentificationAlgorithm("TLS");
 
     pool = new JedisPool(redisUri, createWeakSslSocketFactory(), sslParameters, createWeakHostnameVerifier());
   }
