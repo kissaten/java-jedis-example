@@ -28,6 +28,14 @@ public class Main extends HttpServlet {
       throw new IllegalArgumentException("No REDIS_URL is set!");
     }
 
+    if (System.getenv("REDISS_URL") == null) {
+      this.pool = redisUriPool();
+    } else {
+      this.pool = redissUriPool();
+    }
+  }
+
+  public JedisPool redissUriPool() throws URISyntaxException, KeyManagementException, NoSuchAlgorithmException {
     String rawRedisUrl = System.getenv("REDIS_URL");
 
     String[] redisUrlParts = rawRedisUrl.split(":");
@@ -44,9 +52,16 @@ public class Main extends HttpServlet {
     URI redisUri = new URI(redissUrl);
 
     final SSLParameters sslParameters = new SSLParameters();
-//    sslParameters.setEndpointIdentificationAlgorithm("TLS");
 
-    pool = new JedisPool(redisUri, createWeakSslSocketFactory(), sslParameters, createWeakHostnameVerifier());
+    return new JedisPool(redisUri, createWeakSslSocketFactory(), sslParameters, createWeakHostnameVerifier());
+  }
+
+  public JedisPool redisUriPool() throws URISyntaxException {
+    String rawRedisUrl = System.getenv("REDIS_URL");
+
+    URI redisUri = new URI(rawRedisUrl);
+
+    return new JedisPool(redisUri);
   }
 
   public SSLSocketFactory createWeakSslSocketFactory() throws NoSuchAlgorithmException, KeyManagementException {
